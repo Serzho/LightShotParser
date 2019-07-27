@@ -4,6 +4,7 @@ import httplib2
 import re
 import random
 import time
+import sys
 
 class DownloadThread(threading.Thread):
 	def __init__(self, count_of_pictures = 0):
@@ -22,7 +23,7 @@ class DownloadThread(threading.Thread):
 		self.__running = True
 
 		page_urls = self.__newUrls()
-		domain = 'https://prnt.sc/'
+		domain = 'http://i.imgur.com/'
 
 		while self.__running:
 			print('New one hundred urls...')
@@ -51,17 +52,20 @@ class DownloadThread(threading.Thread):
 	def __getImage(self, page):
 		pattern = r"([\w\.-]+)(\.(jpg)|(png))"
 
-		image_name = re.search(pattern, str(page)).group()
-		#print(image_name)
-		badNames = ['footer-logo.png', 'icon_lightshot.png', '0_173a7b_211be8ff.png']
-		if image_name not in badNames:
-			image_url = 'https://image.prntscr.com/image/' + image_name
-			#print(image_url)
-			self.__current_count += 1
-			image = self.__getPage(image_url)
-			image_file = open('download/' + ''.join(image_name), 'wb')
-			image_file.write(image)
-			image_file.close()
+		image_name = re.search(pattern, str(page))
+
+		if image_name is not None:
+			image_name = image_name.group()	
+			#print(image_name)
+			badNames = ['footer-logo.png', 'icon_lightshot.png', '0_173a7b_211be8ff.png']
+			if image_name not in badNames:
+				image_url = 'https://image.prntscr.com/image/' + image_name
+				#print(image_url)
+				self.__current_count += 1
+				image = self.__getPage(image_url)
+				image_file = open('download/' + ''.join(image_name), 'wb')
+				image_file.write(image)
+				image_file.close()
 
 
 	def __getPage(self, url):
@@ -86,6 +90,18 @@ class DownloadThread(threading.Thread):
 			urls.append(''.join([random.choice(symbols) for i in range(6)]))
 
 		return urls
+
+if __name__ == "__main__":
+	threads = []
+	countThreads, countPicutres  = map(int, sys.argv[1:])
+
+	for i in range(countThreads):
+		threads.append(DownloadThread(countPicutres//countThreads))
+		threads[i].start()
+
+	del countThreads
+	del countPicutres
+
 
 
 		
