@@ -15,7 +15,7 @@ class DownloadThread(threading.Thread):
 		self.__current_count = 0
 	
 	def run(self):	
-		getTime = lambda: datetime.datetime.now().strftime("%H:%M")
+		getTime = lambda: datetime.datetime.now().strftime("%H:%M") #функция для вывода текущего времени
 		print('Download Thread was started at %s' % getTime())
 		print('%d pictures will be download' % self.__count_pictures)
 		print('Starting...')
@@ -28,7 +28,7 @@ class DownloadThread(threading.Thread):
 		while self.__running:
 			print('New one hundred urls...')
 			duration = time.time()
-			for url in page_urls:
+			for url in page_urls: #скачивание картинок из всех созданных адресов
 				if(self.__current_count >= self.__count_pictures or
 											 not self.__running):
 					self.__running = False
@@ -49,20 +49,21 @@ class DownloadThread(threading.Thread):
 		self.__running = False
 		self.join()
 
-	def __getImage(self, page):
-		pattern = r"([\w\.-]+)(\.(jpg)|(png))"
+	def __getImage(self, page): #функция для скачивания картинок
+		pattern = r"([\w\.-]+)(\.(jpg)|(png))" #паттерн для поиска ссылки на картинку
 
-		image_name = re.search(pattern, str(page))
+		image_name = re.search(pattern, str(page)) #поиск имени картинки
 
 		if image_name is not None:
 			image_name = image_name.group()	
 			#print(image_name)
 			badNames = ['footer-logo.png', 'icon_lightshot.png', '0_173a7b_211be8ff.png']
 			if image_name not in badNames:
-				image_url = 'https://image.prntscr.com/image/' + image_name
+				image_url = 'https://image.prntscr.com/image/' + image_name #создание ссылки на картинку
 				#print(image_url)
 				self.__current_count += 1
-				image = self.__getPage(image_url)
+				image = self.__getPage(image_url) #скачивание картинки
+				#сохранение картинки
 				image_file = open('download/' + ''.join(image_name), 'wb')
 				image_file.write(image)
 				image_file.close()
@@ -71,7 +72,6 @@ class DownloadThread(threading.Thread):
 	def __getPage(self, url):
 		h = httplib2.Http('.cache')
 		content = h.request(url)[1]
-		del h
 
 		return content
 
